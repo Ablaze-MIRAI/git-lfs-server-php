@@ -21,15 +21,6 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
   exit;
 }
 
-if (
-  !isset($_SERVER["PHP_AUTH_USER"]) ||
-  !isset($_SERVER["PHP_AUTH_PW"]) ||
-  !verify_password($_SERVER["PHP_AUTH_USER"], $_SERVER["PHP_AUTH_PW"])
-) {
-  http_response_code(401);
-  exit;
-}
-
 $request_body = file_get_contents("php://input");
 $request_json = json_decode($request_body, true);
 
@@ -55,6 +46,17 @@ if ($operation !== "download" && $operation !== "upload") {
   http_response_code(400);
   echo json_encode(["message" => "Invalid JSON body"]);
   exit;
+}
+
+if ($operation !== "download") {
+  if (
+    !isset($_SERVER["PHP_AUTH_USER"]) ||
+    !isset($_SERVER["PHP_AUTH_PW"]) ||
+    !verify_password($_SERVER["PHP_AUTH_USER"], $_SERVER["PHP_AUTH_PW"])
+  ) {
+    http_response_code(401);
+    exit;
+  }
 }
 
 $response = ["objects" => []];
