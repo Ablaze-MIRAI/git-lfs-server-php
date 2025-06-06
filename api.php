@@ -80,7 +80,7 @@ foreach ($request_json["objects"] as $object) {
   $file_path = OBJECT_DIR . $oid;
 
   if (
-    $response === "download" &&
+    $operation === "download" &&
     (
       !file_exists($file_path) ||
       filesize($file_path) !== $size
