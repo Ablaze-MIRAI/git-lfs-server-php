@@ -3,3 +3,7 @@
   RewriteRule ^objects/batch$ api.php [L]
   RewriteRule ^objects/(.*)$ storage.php [L]
 </IfModule>
+
+<Files ~ "^.lfs-server-passwd$">
+  Deny from all
+</Files>

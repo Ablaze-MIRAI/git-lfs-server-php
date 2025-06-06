@@ -1,4 +1,6 @@
 <?php
+require_once "auth.php";
+
 define("OBJECT_DIR", __DIR__ . "/objects/");
 
 function getUrl($path) {
@@ -14,6 +16,15 @@ header("Content-Type: application/vnd.git-lfs+json");
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
   http_response_code(405);
+  exit;
+}
+
+if (
+  !isset($_SERVER["PHP_AUTH_USER"]) ||
+  !isset($_SERVER["PHP_AUTH_PW"]) ||
+  !verify_password($_SERVER["PHP_AUTH_USER"], $_SERVER["PHP_AUTH_PW"])
+) {
+  http_response_code(401);
   exit;
 }
 
