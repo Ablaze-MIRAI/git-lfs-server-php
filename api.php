@@ -37,73 +37,73 @@ if (json_last_error() !== JSON_ERROR_NONE) {
   exit;
 }
 
+if (
+  !isset($request_json["operation"]) ||
+  gettype($request_json["operation"]) !== "string" ||
+  !isset($request_json["objects"]) ||
+  gettype($request_json["objects"]) !== "array"
+) {
+  http_response_code(400);
+  echo json_encode(["message" => "Invalid JSON body"]);
+  exit;
+}
+
+$operation = $request_json["operation"];
+if ($operation !== "download" && $operation !== "upload") {
+  http_response_code(400);
+  echo json_encode(["message" => "Invalid JSON body"]);
+  exit;
+}
+
 $response = ["objects" => []];
 
-$operation = $request_json["operation"] ?? "download";
-
-switch ($operation) {
-  case "upload":
-    foreach ($request_json["objects"] as $object) {
-      $oid = $object["oid"];
-      if (!isValidOid($oid)) {
-        http_response_code(400);
-        echo json_encode(["message" => "Invalid OID"]);
-        exit;
-      }
-      $size = $object["size"];
-
-      $response["objects"][] = [
-        "oid" => $oid,
-        "size" => $size,
-        "actions" => [
-          "upload" => [
-            "href" => getUrl("/objects/" . $oid),
-            "header" => [],
-            "expires_in" => 86400,
-          ]
-        ]
-      ];
-    }
-    break;
-  case "download":
-    foreach ($request_json["objects"] as $object) {
-      $oid = $object["oid"];
-      if (!isValidOid($oid)) {
-        http_response_code(400);
-        echo json_encode(["message" => "Invalid OID"]);
-        exit;
-      }
-      $size = $object["size"];
-      $file_path = OBJECT_DIR . $oid;
-
-      if (file_exists($file_path) && filesize($file_path) === $size) {
-        $response["objects"][] = [
-          "oid" => $oid,
-          "size" => $size,
-          "actions" => [
-            "download" => [
-              "href" => getUrl("/objects/" . $oid),
-              "header" => [],
-              "expires_in" => 86400,
-            ]
-          ]
-        ];
-      } else {
-        $response["objects"][] = [
-          "oid" => $oid,
-          "size" => $size,
-          "error" => [
-            "code" => 404,
-            "message" => "Object not found"
-          ]
-        ];
-      }
-    }
-    break;
-  default:
+foreach ($request_json["objects"] as $object) {
+  if (!isset($object["oid"]) || gettype($object["oid"]) !== "string") {
     http_response_code(400);
     echo json_encode(["message" => "Invalid JSON body"]);
     exit;
+  }
+  $oid = $object["oid"];
+  if (!isValidOid($oid)) {
+    http_response_code(400);
+    echo json_encode(["message" => "Invalid OID"]);
+    exit;
+  }
+  $size = $object["size"];
+  $file_path = OBJECT_DIR . $oid;
+
+  if (
+    $response === "download" &&
+    (
+      !file_exists($file_path) ||
+      filesize($file_path) !== $size
+    )
+  ) {
+    $response["objects"][] = [
+      "oid" => $oid,
+      "size" => $size,
+      "error" => [
+        "code" => 404,
+        "message" => "Object not found"
+      ]
+    ];
+  } else {
+    $response["objects"][] = [
+      "oid" => $oid,
+      "size" => $size,
+      "actions" => $operation === "upload" ? [
+        "upload" => [
+          "href" => getUrl($file_path),
+          "header" => [],
+        ]
+      ] : [
+        "download" => [
+          "href" => getUrl($file_path),
+          "header" => [],
+        ]
+      ]
+    ];
+  }
 }
 
 echo json_encode($response);
