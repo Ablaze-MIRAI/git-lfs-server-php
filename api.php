@@ -60,7 +60,12 @@ if ($operation !== "download" && $operation !== "upload") {
 $response = ["objects" => []];
 
 foreach ($request_json["objects"] as $object) {
-  if (!isset($object["oid"]) || gettype($object["oid"]) !== "string") {
+  if (
+    !isset($object["oid"]) ||
+    gettype($object["oid"]) !== "string" ||
+    !isset($object["size"]) ||
+    gettype($object["size"]) !== "integer"
+  ) {
     http_response_code(400);
     echo json_encode(["message" => "Invalid JSON body"]);
     exit;
