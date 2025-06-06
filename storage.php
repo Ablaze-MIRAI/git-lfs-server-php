@@ -1,4 +1,6 @@
 <?php
+require_once "auth.php";
+
 define("OBJECT_DIR", __DIR__ . "/objects/");
 
 if (!preg_match('#/objects/([a-f0-9]{64})$#', $_SERVER["REQUEST_URI"], $match)) {
@@ -12,6 +14,15 @@ $file_path = OBJECT_DIR . $oid;
 
 switch ($_SERVER["REQUEST_METHOD"]) {
   case "PUT":
+    if (
+      !isset($_SERVER["PHP_AUTH_USER"]) ||
+      !isset($_SERVER["PHP_AUTH_PW"]) ||
+      !verify_password($_SERVER["PHP_AUTH_USER"], $_SERVER["PHP_AUTH_PW"])
+    ) {
+      http_response_code(401);
+      exit;
+    }
+
     if (file_exists($file_path)) {
       http_response_code(200);
       exit;
