@@ -101,12 +101,12 @@ foreach ($request_json["objects"] as $object) {
       "actions" => $operation === "upload" ? [
         "upload" => [
           "href" => getUrl("/objects/" . $oid),
-          "header" => [],
+          "header" => (object)[],
         ]
       ] : [
         "download" => [
           "href" => getUrl("/objects/" . $oid),
-          "header" => [],
+          "header" => (object)[],
         ]
       ]
     ];
