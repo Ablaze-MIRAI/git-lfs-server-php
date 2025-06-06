@@ -1,5 +1,15 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
+
+  RewriteCond %{REQUEST_URI} /objects/batch$
+  RewriteCond %{REQUEST_METHOD} !POST
+  RewriteRule ^ - [R=405,L]
+
+  RewriteCond %{REQUEST_URI} /objects/(.*)$
+  RewriteCond %{REQUEST_URI} !/objects/batch$
+  RewriteCond %{REQUEST_METHOD} !^(PUT|GET)$
+  RewriteRule ^ - [R=405,L]
+
   RewriteRule ^objects/batch$ api.php [L]
   RewriteRule ^objects/(.*)$ storage.php [L]
 </IfModule>
@@ -7,3 +17,9 @@
 <Files ~ "^.lfs-server-passwd$">
   Deny from all
 </Files>
+
+LimitRequestBody 5368709120
+
+<If "%{REQUEST_URI} =~ m#/objects/batch$#">
+    LimitRequestBody 1048576
+</If>
