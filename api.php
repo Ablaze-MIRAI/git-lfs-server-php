@@ -4,8 +4,10 @@ require_once "auth.php";
 define("OBJECT_DIR", __DIR__ . "/objects/");
 
 function getUrl($path) {
-  $proto = $_SERVER["HTTPS"] !== "off" ? "https" : "http";
-  return $proto . "://" . $_SERVER["HTTP_HOST"] . $path;
+  $proto = (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off") ? "https" : "http";
+  $host = $_SERVER["HTTP_HOST"];
+  $script_dir = rtrim(dirname($_SERVER["SCRIPT_NAME"]), "/");
+  return "{$proto}://{$host}{$script_dir}{$path}";
 }
 
 function isValidOid($oid) {
@@ -93,12 +95,12 @@ foreach ($request_json["objects"] as $object) {
       "size" => $size,
       "actions" => $operation === "upload" ? [
         "upload" => [
-          "href" => getUrl($file_path),
+          "href" => getUrl("/objects/" . $oid),
           "header" => [],
         ]
       ] : [
         "download" => [
-          "href" => getUrl($file_path),
+          "href" => getUrl("/objects/" . $oid),
           "header" => [],
         ]
       ]
