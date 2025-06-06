@@ -9,7 +9,7 @@ function verify_password(string $username, string $password): bool {
   $fp = fopen(PASSWD_FILE_PATH, "r");
 
   while ($line = fgets($fp)) {
-    list($file_username, $hashed_password) = explode(":", $line, 2);
+    list($file_username, $hashed_password) = explode(":", trim($line), 2);
 
     if ($file_username === $username) {
       if (password_verify($password, $hashed_password)) {
