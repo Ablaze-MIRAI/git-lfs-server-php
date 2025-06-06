@@ -54,6 +54,12 @@ switch ($_SERVER["REQUEST_METHOD"]) {
       header("Content-Type: application/octet-stream");
       header("Content-Length: " . filesize($file_path));
       header('Content-Disposition: attachment; filename="' . $oid . '"');
+
+      while (ob_get_level()) {
+        ob_end_flush();
+      }
+      flush();
+
       readfile($file_path);
     } else {
       http_response_code(404);
