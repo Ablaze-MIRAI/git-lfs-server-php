@@ -12,6 +12,11 @@ $file_path = OBJECT_DIR . $oid;
 
 switch ($_SERVER["REQUEST_METHOD"]) {
   case "PUT":
+    if (file_exists($file_path)) {
+      http_response_code(200);
+      exit;
+    }
+
     $input_stream = fopen("php://input", "rb");
     $output_stream = fopen($file_path, "wb");
     if (!$input_stream || !$output_stream) {
