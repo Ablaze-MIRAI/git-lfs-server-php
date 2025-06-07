@@ -18,8 +18,8 @@
   Deny from all
 </Files>
 
-LimitRequestBody 5368709120
+LimitRequestBody 1048576
 
-<If "%{REQUEST_URI} =~ m#/objects/batch$#">
-    LimitRequestBody 1048576
+<If "%{REQUEST_URI} =~ m#/objects/.*$# && %{REQUEST_URI} !~ m#/objects/batch$# && %{REQUEST_METHOD} == 'PUT'">
+    LimitRequestBody 5368709120
 </If>
