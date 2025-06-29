@@ -1,19 +1,30 @@
-name: Build docker Image
+name: Build Docker Image
 
 on:
   push:
+    branches:
+      - 'main'
+    tags:
+      - '*'
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-24.04
     steps:
-      - name: Get short SHA
+      - name: Get short commit sha
+        if: "!startsWith(github.ref, 'refs/tags/')"
         run: |
-          echo "SHORT_SHA=$(echo $GITHUB_SHA | head -c7)" >> $GITHUB_ENV
-      - name: Print short SHA
+          echo "DOCKER_TAG=$(echo $GITHUB_SHA | head -c7)" >> $GITHUB_ENV
+
+      - name: Get tag name
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
-          echo "${{ env.SHORT_SHA }}"
+          echo "DOCKER_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
+
+      - name: Print Docker tag name
+        run: |
+          echo "${{ env.DOCKER_TAG }}"
 
       - name: Clone
         uses: actions/checkout@v4
@@ -32,4 +43,12 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/ablaze-mirai/git-lfs-server-php:${{ env.SHORT_SHA }}
+          tags: ghcr.io/ablaze-mirai/git-lfs-server-php:${{ env.DOCKER_TAG }}
+
+      - name: Build and push (latest)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/ablaze-mirai/git-lfs-server-php:latest
