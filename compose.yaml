@@ -1,0 +1,8 @@
+services:
+  server:
+    build: .
+    restart: always
+    ports:
+      - 127.0.0.1:3363:80
+    volumes:
+      - ./.lfs-server-passwd:/var/www/html/.lfs-server-passwd:ro
