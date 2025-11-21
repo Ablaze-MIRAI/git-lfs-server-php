@@ -27,7 +27,7 @@ jobs:
           echo "${{ env.DOCKER_TAG }}"
 
       - name: Clone
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: true
 
