@@ -1,4 +1,4 @@
-FROM php:7.2-apache
+FROM php:8.6-apache
 RUN  a2enmod rewrite
 COPY ./*.php /var/www/html/
 COPY ./.htaccess /var/www/html/
